@@ -1,82 +1,74 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Apple Pay Demo</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 100px;
+}
+
+#applePayBtn {
+    background: black;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 20px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#paymentBox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+}
+
+#paymentWindow {
+    background: white;
+    width: 320px;
+    margin: 150px auto;
+    padding: 20px;
+    border-radius: 15px;
+}
+</style>
 </head>
 <body>
 
-<button id="apple-pay-button">Apple Pay</button>
+<button id="applePayBtn"> Pay</button>
+
+<div id="paymentBox">
+    <div id="paymentWindow">
+        <h2>Apple Pay</h2>
+        <p>Demo payment</p>
+        <p><b>$1.99</b></p>
+
+        <button onclick="pay()">Pay</button>
+        <button onclick="closePay()">Cancel</button>
+    </div>
+</div>
 
 <script>
-document
-  .getElementById("apple-pay-button")
-  .addEventListener("click", onApplePayButtonClicked);
+const box = document.getElementById("paymentBox");
 
-async function onApplePayButtonClicked() {
+document.getElementById("applePayBtn").onclick = () => {
+    box.style.display = "block";
+};
 
-    if (!window.ApplePaySession) {
-        alert("Apple Pay не поддерживается");
-        return;
-    }
+function closePay() {
+    box.style.display = "none";
+}
 
-    if (!ApplePaySession.canMakePayments()) {
-        alert("Apple Pay недоступен");
-        return;
-    }
-
-    const request = {
-        countryCode: "US",
-        currencyCode: "USD",
-        merchantCapabilities: ["supports3DS"],
-        supportedNetworks: [
-            "visa",
-            "masterCard",
-            "amex"
-        ],
-        total: {
-            label: "Demo Store",
-            amount: "1.99",
-            type: "final"
-        }
-    };
-
-    const session = new ApplePaySession(3, request);
-
-    session.onvalidatemerchant = async function(event) {
-        console.log("Merchant validation URL:", event.validationURL);
-
-        // Заглушка для демо
-        session.abort();
-
-        alert(
-            "Для настоящего Apple Pay нужен Merchant ID и серверная валидация."
-        );
-    };
-
-    session.onpaymentauthorized = function(event) {
-
-        console.log("Payment authorized", event.payment);
-
-        session.completePayment(
-            ApplePaySession.STATUS_SUCCESS
-        );
-
-        alert("Демо-платёж выполнен");
-    };
-
-    session.oncancel = function() {
-        console.log("Apple Pay cancelled");
-    };
-
-    try {
-        session.begin();
-    } catch (e) {
-        console.error(e);
-        alert(e.message);
-    }
+function pay() {
+    alert("Payment successful (DEMO)");
+    box.style.display = "none";
 }
 </script>
 
 </body>
 </html>
+```
