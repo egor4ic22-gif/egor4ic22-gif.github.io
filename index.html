@@ -1,72 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apple Pay Demo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Підтримати проєкт</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 100px;
-        }
-
-        #apple-pay-button {
-            -webkit-appearance: -apple-pay-button;
-            -apple-pay-button-type: buy;
-            -apple-pay-button-style: black;
-            width: 250px;
-            height: 50px;
-            border: none;
-            cursor: pointer;
-        }
-    </style>
+<style>
+body{
+    margin:0;
+    background:#000;
+    color:#fff;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+.card{
+    width:380px;
+    padding:40px;
+    border-radius:24px;
+    background:#111;
+    text-align:center;
+    box-shadow:0 0 40px rgba(255,255,255,.08);
+}
+.logo{
+    font-size:48px;
+    margin-bottom:10px;
+}
+h1{
+    margin:0;
+}
+input{
+    width:100%;
+    padding:16px;
+    margin-top:25px;
+    border:none;
+    border-radius:12px;
+    background:#222;
+    color:white;
+    font-size:20px;
+    box-sizing:border-box;
+}
+.button{
+    width:100%;
+    margin-top:20px;
+    padding:16px;
+    border:none;
+    border-radius:14px;
+    background:white;
+    color:black;
+    font-size:20px;
+    font-weight:bold;
+    cursor:pointer;
+}
+.note{
+    margin-top:15px;
+    color:#888;
+    font-size:14px;
+}
+</style>
 </head>
 <body>
 
-<h1>Apple Pay Demo</h1>
+<div class="card">
+    <div class="logo"></div>
+    <h1>Підтримати проєкт</h1>
 
-<button id="apple-pay-button"></button>
+    <input type="number" id="amount"
+           placeholder="Сума в гривнях">
+
+    <button class="button"
+            onclick="donate()">
+        Apple Pay
+    </button>
+
+    <div class="note">
+        Введіть бажану суму пожертви
+    </div>
+</div>
 
 <script>
-if (window.ApplePaySession &&
-    ApplePaySession.canMakePayments()) {
+function donate(){
+    const amount =
+      document.getElementById('amount').value;
 
-    document
-        .getElementById("apple-pay-button")
-        .addEventListener("click", beginApplePay);
+    if(!amount || amount <= 0){
+        alert('Введіть суму');
+        return;
+    }
 
-} else {
-    document.getElementById("apple-pay-button").style.display = "none";
-}
-
-function beginApplePay() {
-
-    const paymentRequest = {
-        countryCode: "US",
-        currencyCode: "USD",
-        supportedNetworks: ["visa", "masterCard", "amex"],
-        merchantCapabilities: ["supports3DS"],
-        total: {
-            label: "Demo Store",
-            amount: "9.99"
-        }
-    };
-
-    const session = new ApplePaySession(3, paymentRequest);
-
-    session.onvalidatemerchant = async (event) => {
-        console.log("Merchant validation required");
-    };
-
-    session.onpaymentauthorized = (event) => {
-        session.completePayment(
-            ApplePaySession.STATUS_SUCCESS
-        );
-    };
-
-    session.begin();
+    alert(
+      'Пожертва: ' + amount +
+      ' грн\\n(демонстраційна сторінка)'
+    );
 }
 </script>
 
