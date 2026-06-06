@@ -2,8 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apple Pay Demo</title>
 
 <style>
@@ -20,17 +19,55 @@ height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
+color:white;
 }
 
-.apple-button{
-background:#fff;
-color:#000;
+.card{
+width:90%;
+max-width:420px;
+background:#111;
+border-radius:30px;
+padding:40px;
+text-align:center;
+box-shadow:0 0 40px rgba(255,255,255,.08);
+}
+
+.logo{
+font-size:70px;
+margin-bottom:10px;
+}
+
+h1{
+font-size:34px;
+margin-bottom:10px;
+}
+
+p{
+color:#888;
+margin-bottom:30px;
+}
+
+#apple-pay-button{
+-webkit-appearance:-apple-pay-button;
+-apple-pay-button-type:buy;
+-apple-pay-button-style:black;
+width:100%;
+height:55px;
 border:none;
-padding:18px 50px;
-font-size:28px;
-font-weight:700;
-border-radius:18px;
 cursor:pointer;
+}
+
+.demoBtn{
+width:100%;
+height:55px;
+border:none;
+border-radius:14px;
+background:white;
+color:black;
+font-size:22px;
+font-weight:700;
+cursor:pointer;
+display:none;
 }
 
 .modal{
@@ -46,123 +83,159 @@ padding:20px;
 .sheet{
 background:#1c1c1e;
 width:100%;
-max-width:360px;
-border-radius:30px;
+max-width:340px;
+border-radius:28px;
 padding:30px;
 text-align:center;
-color:white;
 animation:show .25s ease;
 }
 
 @keyframes show{
-from{transform:scale(.9);opacity:0}
-to{transform:scale(1);opacity:1}
+from{
+transform:scale(.9);
+opacity:0;
 }
-
-.logo{
-font-size:60px;
+to{
+transform:scale(1);
+opacity:1;
 }
-
-.title{
-font-size:26px;
-margin-top:10px;
-}
-
-.amount{
-font-size:38px;
-font-weight:bold;
-margin:20px 0;
-}
-
-.pay{
-width:100%;
-height:55px;
-border:none;
-border-radius:14px;
-background:#0a84ff;
-color:white;
-font-size:20px;
-font-weight:bold;
-cursor:pointer;
-}
-
-.face{
-display:none;
-font-size:80px;
-margin-top:15px;
 }
 
 .success{
-display:none;
-font-size:80px;
-margin-top:15px;
+font-size:70px;
+margin-bottom:15px;
 }
 
-.done{
-display:none;
-font-size:22px;
-margin-top:15px;
+.close{
+margin-top:20px;
+width:100%;
+height:50px;
+border:none;
+border-radius:12px;
+background:#0a84ff;
+color:white;
+font-size:18px;
+cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<button class="apple-button" onclick="openPay()">
- Apple Pay
+<div class="card">
+
+<div class="logo"></div>
+
+<h1>Apple Pay</h1>
+
+<p>Fast. Secure. Private.</p>
+
+<button id="apple-pay-button"></button>
+
+<button class="demoBtn" id="demoBtn">
+ Apple Pay Demo
 </button>
+
+</div>
 
 <div class="modal" id="modal">
 <div class="sheet">
 
-<div class="logo"></div>
-<div class="title">Apple Pay</div>
+<div class="success">✅</div>
 
-<div class="amount">75 грн</div>
+<h2>Payment Successful</h2>
 
-<button class="pay" onclick="payNow()">
-Оплатити
+<p style="margin-top:10px">
+Demo Simulation
+</p>
+
+<button class="close" onclick="closeModal()">
+Done
 </button>
-
-<div class="face" id="face">
-😊<br>
-Face ID
-</div>
-
-<div class="success" id="success">
-✅
-</div>
-
-<div class="done" id="done">
-Оплата успішна
-</div>
 
 </div>
 </div>
 
 <script>
-function openPay(){
-document.getElementById("modal").style.display="flex";
+
+const appleBtn =
+document.getElementById("apple-pay-button");
+
+const demoBtn =
+document.getElementById("demoBtn");
+
+if (
+window.ApplePaySession &&
+ApplePaySession.canMakePayments()
+){
+
+appleBtn.addEventListener(
+"click",
+beginApplePay
+);
+
+}else{
+
+appleBtn.style.display="none";
+demoBtn.style.display="block";
+
+demoBtn.onclick=()=>{
+document.getElementById("modal")
+.style.display="flex";
+};
 }
 
-function payNow(){
+function beginApplePay(){
 
-document.querySelector(".pay").style.display="none";
+try{
 
-document.getElementById("face").style.display="block";
+const paymentRequest = {
+countryCode:"US",
+currencyCode:"USD",
+supportedNetworks:[
+"visa",
+"masterCard",
+"amex"
+],
+merchantCapabilities:[
+"supports3DS"
+],
+total:{
+label:"Demo Store",
+amount:"9.99"
+}
+};
 
-setTimeout(()=>{
-document.getElementById("face").style.display="none";
-document.getElementById("success").style.display="block";
-document.getElementById("done").style.display="block";
-},2000);
+const session =
+new ApplePaySession(
+3,
+paymentRequest
+);
+
+session.onvalidatemerchant = () => {
+
+document.getElementById("modal")
+.style.display="flex";
+
+};
+
+session.begin();
+
+}catch{
+
+document.getElementById("modal")
+.style.display="flex";
+
+}
 }
 
-document.getElementById("modal").onclick=function(e){
-if(e.target.id==="modal"){
-location.reload();
+function closeModal(){
+
+document.getElementById("modal")
+.style.display="none";
+
 }
-}
+
 </script>
 
 </body>
