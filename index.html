@@ -1,136 +1,50 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Apple Pay Demo</title>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
 body{
-    min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
-
-    background:
-        radial-gradient(circle at top left,#4f46e5,#111827 50%),
-        radial-gradient(circle at bottom right,#0ea5e9,#000 50%);
-}
-
-.card{
-    width:380px;
-    padding:32px;
-    border-radius:28px;
-
-    background:rgba(255,255,255,.08);
-    backdrop-filter:blur(20px);
-
-    border:1px solid rgba(255,255,255,.15);
-
-    box-shadow:
-        0 20px 60px rgba(0,0,0,.4),
-        inset 0 1px 0 rgba(255,255,255,.15);
-
-    text-align:center;
-    color:white;
-}
-
-.logo{
-    font-size:54px;
-    margin-bottom:10px;
-}
-
-h1{
-    font-size:30px;
-    font-weight:700;
-    margin-bottom:10px;
-}
-
-.subtitle{
-    color:rgba(255,255,255,.7);
-    margin-bottom:30px;
-    line-height:1.5;
-}
-
-.price{
-    font-size:42px;
-    font-weight:700;
-    margin-bottom:4px;
-}
-
-.label{
-    color:rgba(255,255,255,.6);
-    margin-bottom:30px;
+    min-height:100vh;
+    background:#111827;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
 
 #apple-pay-button{
     -webkit-appearance:-apple-pay-button;
     -apple-pay-button-type:buy;
     -apple-pay-button-style:black;
-
-    width:100%;
-    height:54px;
-
+    width:250px;
+    height:50px;
     border:none;
-    cursor:pointer;
-
-    transition:transform .2s ease;
-}
-
-#apple-pay-button:hover{
-    transform:scale(1.03);
-}
-
-.footer{
-    margin-top:20px;
-    font-size:12px;
-    color:rgba(255,255,255,.5);
 }
 </style>
 </head>
-
 <body>
 
-<div class="card">
-
-    <div class="logo"></div>
-
-    <h1>Apple Pay Demo</h1>
-
-    <p class="subtitle">
-        Fast, secure and private payments with Apple Pay.
-    </p>
-
-    <div class="price">$9.99</div>
-    <div class="label">Premium Subscription</div>
-
-    <button id="apple-pay-button"></button>
-
-    <div class="footer">
-        Demo Environment • No Real Charges
-    </div>
-
-</div>
+<button id="apple-pay-button"></button>
 
 <script>
-
-const button = document.getElementById("apple-pay-button");
 
 if (
     window.ApplePaySession &&
     ApplePaySession.canMakePayments()
 ) {
-    button.addEventListener("click", beginApplePay);
+
+    document
+        .getElementById("apple-pay-button")
+        .addEventListener("click", beginApplePay);
+
 } else {
-    button.style.display = "none";
+
+    alert("Apple Pay is not available");
+
 }
 
 function beginApplePay() {
@@ -138,17 +52,14 @@ function beginApplePay() {
     const paymentRequest = {
         countryCode: "US",
         currencyCode: "USD",
-
         supportedNetworks: [
             "visa",
             "masterCard",
             "amex"
         ],
-
         merchantCapabilities: [
             "supports3DS"
         ],
-
         total: {
             label: "Demo Store",
             amount: "9.99"
@@ -158,26 +69,19 @@ function beginApplePay() {
     const session =
         new ApplePaySession(3, paymentRequest);
 
-    session.onvalidatemerchant = async (event) => {
-
-        console.log(
-            "Merchant validation:",
-            event.validationURL
-        );
+    session.onvalidatemerchant = function () {
 
         // DEMO ONLY
-        // Real merchant validation required
+        session.completeMerchantValidation({});
     };
 
-    session.onpaymentauthorized = (event) => {
+    session.onpaymentauthorized = function () {
 
-        console.log("Payment:", event.payment);
+        session.completePayment({
+            status: ApplePaySession.STATUS_SUCCESS
+        });
 
-        session.completePayment(
-            ApplePaySession.STATUS_SUCCESS
-        );
-
-        alert("✅ Demo payment successful!");
+        alert("Payment successful!");
     };
 
     session.begin();
@@ -187,3 +91,4 @@ function beginApplePay() {
 
 </body>
 </html>
+```
