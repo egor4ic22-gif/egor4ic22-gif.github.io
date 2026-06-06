@@ -1,135 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Apple Pay Demo</title>
+</head>
+<body>
+
 <button id="apple-pay-button">Apple Pay</button>
 
 <script>
-document.getElementById("apple-pay-button")
-    .addEventListener("click", onApplePayButtonClicked);
-
-async function validateMerchant(validationURL) {
-    // Для демо возвращаем заглушку.
-    // В реальном проекте здесь запрос к серверу.
-    console.log("Merchant validation:", validationURL);
-
-    return fetch("/validate-merchant", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            validationURL
-        })
-    }).then(r => r.json());
-}
-
-function calculateTotal(couponCode) {
-    let amount = 27.50;
-
-    if (couponCode === "SALE10") {
-        amount -= 10;
-    }
-
-    return {
-        label: "Demo Store",
-        amount: {
-            value: amount.toFixed(2),
-            currency: "USD"
-        }
-    };
-}
-
-function calculateDisplayItem(couponCode) {
-    if (couponCode === "SALE10") {
-        return [{
-            label: "Discount",
-            amount: {
-                value: "-10.00",
-                currency: "USD"
-            }
-        }];
-    }
-
-    return [];
-}
-
-function calculateShippingOptions() {
-    return [
-        {
-            id: "standard",
-            label: "Standard Shipping",
-            amount: {
-                value: "5.00",
-                currency: "USD"
-            },
-            selected: true
-        },
-        {
-            id: "express",
-            label: "Express Shipping",
-            amount: {
-                value: "15.00",
-                currency: "USD"
-            }
-        }
-    ];
-}
-
-function calculateError() {
-    return "";
-}
+document
+  .getElementById("apple-pay-button")
+  .addEventListener("click", onApplePayButtonClicked);
 
 async function onApplePayButtonClicked() {
 
-    if (!window.PaymentRequest) {
-        alert("Payment Request API is not supported");
+    if (!window.ApplePaySession) {
+        alert("Apple Pay не поддерживается");
         return;
     }
 
-    const paymentMethodData = [{
-        supportedMethods: "https://apple.com/apple-pay",
-        data: {
-            version: 3,
-            merchantIdentifier: "merchant.com.example",
-            merchantCapabilities: ["supports3DS"],
-            supportedNetworks: [
-                "visa",
-                "masterCard",
-                "amex"
-            ],
-            countryCode: "US"
-        }
-    }];
+    if (!ApplePaySession.canMakePayments()) {
+        alert("Apple Pay недоступен");
+        return;
+    }
 
-    const paymentDetails = {
+    const request = {
+        countryCode: "US",
+        currencyCode: "USD",
+        merchantCapabilities: ["supports3DS"],
+        supportedNetworks: [
+            "visa",
+            "masterCard",
+            "amex"
+        ],
         total: {
             label: "Demo Store",
-            amount: {
-                value: "27.50",
-                currency: "USD"
-            }
+            amount: "1.99",
+            type: "final"
         }
     };
 
-    const request = new PaymentRequest(
-        paymentMethodData,
-        paymentDetails
-    );
+    const session = new ApplePaySession(3, request);
 
-    request.onmerchantvalidation = event => {
-        event.complete(
-            validateMerchant(event.validationURL)
+    session.onvalidatemerchant = async function(event) {
+        console.log("Merchant validation URL:", event.validationURL);
+
+        // Заглушка для демо
+        session.abort();
+
+        alert(
+            "Для настоящего Apple Pay нужен Merchant ID и серверная валидация."
         );
     };
 
+    session.onpaymentauthorized = function(event) {
+
+        console.log("Payment authorized", event.payment);
+
+        session.completePayment(
+            ApplePaySession.STATUS_SUCCESS
+        );
+
+        alert("Демо-платёж выполнен");
+    };
+
+    session.oncancel = function() {
+        console.log("Apple Pay cancelled");
+    };
+
     try {
-        const response = await request.show();
-
-        console.log("Payment token:", response.details);
-
-        await response.complete("success");
-
-        alert("Test payment completed");
-    }
-    catch (err) {
-        console.error(err);
+        session.begin();
+    } catch (e) {
+        console.error(e);
+        alert(e.message);
     }
 }
 </script>
+
+</body>
+</html>
