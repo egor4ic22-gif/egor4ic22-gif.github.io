@@ -1,45 +1,92 @@
-<script crossorigin
-        src="https://applepay.cdn-apple.com/jsapi/1.latest/apple-pay-sdk.js"
-        ></script>
-<style>
-apple-pay-button {
-  --apple-pay-button-width: 150px;
-  --apple-pay-button-height: 30px;
-  --apple-pay-button-border-radius: 3px;
-  --apple-pay-button-padding: 0px 0px;
-  --apple-pay-button-box-sizing: border-box;
-}
-</style>
-<apple-pay-button buttonstyle="black" type="plain" locale="en-US"></apple-pay-button>
-var request = null;
-if (window.PaymentRequest)
-    request = new PaymentRequest(methods, details, options);
-else
-    // Consider using Apple Pay JS instead.
-    {
-    "supportedMethods": "https://apple.com/apple-pay",
-    "data": {
-        "version": 3,
-        "merchantIdentifier": "merchant.com.apdemo",
-        "merchantCapabilities": [
-            "supports3DS"
-        ],
-        "supportedNetworks": [
-            "amex",
-            "discover",
-            "masterCard",
-            "visa"
-        ],
-        "countryCode": "US"
-    }
-}
+async function onApplePayButtonClicked() {
 
-{
-    "total": {
-        "label": "Demo (Card is not charged)",
-        "amount": {
-            "value": "27.50",
-            "currency": "USD"
-        }
-    }
+    const modal = document.createElement("div");
+
+    modal.innerHTML = `
+        <div style="
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.8);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            z-index:9999;">
+            <div style="
+                background:#1c1c1e;
+                color:white;
+                padding:30px;
+                border-radius:25px;
+                text-align:center;
+                width:300px;">
+                
+                <h2> Apple Pay</h2>
+                <p>Demo Payment</p>
+                <h1>$27.50</h1>
+
+                <button id="payBtn"
+                style="
+                width:100%;
+                height:50px;
+                border:none;
+                border-radius:12px;
+                background:#0a84ff;
+                color:white;
+                font-size:18px;">
+                Pay with Face ID
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById("payBtn")
+    .onclick = () => {
+
+        modal.innerHTML = `
+        <div style="
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.8);
+            display:flex;
+            justify-content:center;
+            align-items:center;">
+            <div style="
+                background:#1c1c1e;
+                color:white;
+                padding:30px;
+                border-radius:25px;
+                text-align:center;
+                width:300px;">
+                <h1>😊</h1>
+                <p>Face ID</p>
+            </div>
+        </div>
+        `;
+
+        setTimeout(() => {
+
+            modal.innerHTML = `
+            <div style="
+                position:fixed;
+                inset:0;
+                background:rgba(0,0,0,.8);
+                display:flex;
+                justify-content:center;
+                align-items:center;">
+                <div style="
+                    background:#1c1c1e;
+                    color:white;
+                    padding:30px;
+                    border-radius:25px;
+                    text-align:center;
+                    width:300px;">
+                    <h1>✅</h1>
+                    <h2>Payment Successful</h2>
+                </div>
+            </div>
+            `;
+
+        }, 2000);
+    };
 }
